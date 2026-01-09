@@ -1,0 +1,74 @@
+services:
+  # Base de datos MySQL
+  mysql:
+    image: mysql:8.0
+    container_name: proyecto-mysql
+    ports: 
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./init:/docker-entrypoint-initdb.d
+    networks:
+      - prestamos-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-ppassword"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # API de Tramitación
+  api_tramitacion:
+    build: ./API_TRAMITACION
+    container_name: api-tramitacion
+    ports:
+      - "8080:8080"
+    environment:
+      - PORT_API=8080
+      - DB_USER=root
+      - DB_PASSWORD=password
+      - DB_NAME=BD01_TRAMITACION
+      - DB_PORT=3306
+      - DB_HOST=mysql
+    volumes:
+      - ./API_TRAMITACION:/usr/app
+      - /usr/app/node_modules
+    depends_on:
+      mysql:
+        condition: service_healthy
+    restart: on-failure
+    networks:
+      - prestamos-network
+
+  # API de Validaciones
+  api_validaciones:
+    build: ./API_VALIDACIONES
+    container_name: api-validaciones
+    ports:
+      - "8081:8081"
+    environment:
+      - PORT_API=8081
+      - DB_USER=root
+      - DB_PASSWORD=password
+      - DB_NAME=BD01_VALIDACIONES
+      - DB_NAME_TRAMITACION=BD01_TRAMITACION
+      - DB_PORT=3306
+      - DB_HOST=mysql
+    volumes:
+      - ./API_VALIDACIONES:/usr/app
+      - /usr/app/node_modules
+    depends_on:
+      mysql:
+        condition: service_healthy
+    restart: on-failure
+    networks:
+      - prestamos-network
+
+volumes:
+  mysql_data:
+
+networks:
+  prestamos-network:
+    driver: bridge
+      

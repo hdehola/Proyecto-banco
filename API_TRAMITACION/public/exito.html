@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Solicitud Enviada</title>
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+    />
+    <style>
+      body {
+        background-color: #f8f9fa;
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
+      <a class="navbar-brand" href="/">
+        <i class="fas fa-university"></i> Sistema de Préstamos
+      </a>
+    </nav>
+    <div class="container mt-5">
+      <div class="row justify-content-center">
+        <div class="col-md-8">
+          <div class="card shadow-lg border-success">
+            <div class="card-header bg-success text-white text-center">
+              <h3>
+                <i class="fas fa-check-circle"></i> ¡Solicitud Enviada Exitosamente!
+              </h3>
+            </div>
+            <div class="card-body text-center">
+              <div class="alert alert-success" role="alert">
+                <h4>Tu solicitud ha sido recibida y está siendo procesada</h4>
+              </div>
+
+              <div class="mb-4">
+                <h5>Detalles de tu solicitud:</h5>
+                <table class="table table-borderless" id="solicitudDetalles">
+                </table>
+              </div>
+
+              <div class="alert alert-info" role="alert">
+                <h6><i class="fas fa-info-circle"></i> Próximos pasos:</h6>
+                <ul class="list-unstyled mb-0">
+                  <li>1. Nuestro equipo evaluará tu solicitud de préstamo.</li>
+                  <li>2. Te contactaremos dentro de un plazo máximo de 24 horas con la resolución de tu solicitud.</li>
+                  <li>3. Si tienes cualquier duda, puedes escribirnos a <strong>banco@solicitudes.com</strong>.</li>
+                </ul>
+              </div>
+
+              <div class="row mt-4">
+                <div class="col-md-6">
+                  <a
+                    href="/"
+                    class="btn btn-outline-primary btn-block"
+                  >
+                    <i class="fas fa-calculator"></i> Realizar Nueva Simulación
+                  </a>
+                </div>
+                <div class="col-md-6">
+                  <button
+                    class="btn btn-outline-secondary btn-block"
+                    onclick="window.print()"
+                  >
+                    <i class="fas fa-print"></i> Imprimir Comprobante
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="card-footer text-muted text-center">
+              <small>
+                <i class="fas fa-shield-alt"></i>
+                Tus datos están protegidos y se utilizarán únicamente para procesar
+                tu solicitud
+              </small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <script>
+      $(document).ready(async function () {
+        const solicitudId = localStorage.getItem('solicitud_id');
+        
+        if (!solicitudId) {
+          alert('No se encontró información de la solicitud.');
+          window.location.href = '/';
+          return;
+        }
+
+        try {
+          // Obtener detalles de la solicitud
+          const response = await fetch(`/api/solicitud/${solicitudId}`);
+          if (!response.ok) {
+            throw new Error('Error al obtener solicitud');
+          }
+          const solicitud = await response.json();
+
+          // Formatear fecha
+          const fecha = new Date(solicitud.fecha_solicitud);
+          const fechaFormateada = fecha.toLocaleDateString('es-CL') + ' ' + fecha.toLocaleTimeString('es-CL');
+
+          $('#solicitudDetalles').html(`
+            <tr>
+              <td><strong>Número de Solicitud:</strong></td>
+              <td class="text-primary"><strong>#${solicitud.id}</strong></td>
+            </tr>
+            <tr>
+              <td><strong>Nombre:</strong></td>
+              <td>${solicitud.nombre}</td>
+            </tr>
+            <tr>
+              <td><strong>RUT:</strong></td>
+              <td>${solicitud.rut}</td>
+            </tr>
+            <tr>
+              <td><strong>Email:</strong></td>
+              <td>${solicitud.email}</td>
+            </tr>
+            <tr>
+              <td><strong>Fecha de Solicitud:</strong></td>
+              <td>${fechaFormateada}</td>
+            </tr>
+            <tr>
+              <td><strong>Estado:</strong></td>
+              <td><span class="badge badge-warning">${solicitud.estado}</span></td>
+            </tr>
+            ${solicitud.monto_solicitado ? `
+            <tr>
+              <td><strong>Monto Solicitado:</strong></td>
+              <td class="text-success"><strong>$${parseFloat(solicitud.monto_solicitado).toLocaleString('es-CL')}</strong></td>
+            </tr>
+            <tr>
+              <td><strong>Plazo:</strong></td>
+              <td>${solicitud.plazo_meses} meses</td>
+            </tr>
+            <tr>
+              <td><strong>Valor Cuota:</strong></td>
+              <td class="text-primary"><strong>$${parseFloat(solicitud.valor_cuota).toLocaleString('es-CL')}</strong></td>
+            </tr>
+            ` : ''}
+          `);
+
+          // Limpiar localStorage
+          localStorage.removeItem('solicitud_id');
+          localStorage.removeItem('solicitud_estado');
+
+        } catch (error) {
+          console.error('Error:', error);
+          alert('Error al cargar los detalles de la solicitud.');
+        }
+      });
+    </script>
+  </body>
+</html>
+

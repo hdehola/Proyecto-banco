@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Solicitud Rechazada</title>
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+    />
+    <style>
+      body {
+        background-color: #f8f9fa;
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
+      <a class="navbar-brand" href="/">
+        <i class="fas fa-university"></i> Sistema de Préstamos
+      </a>
+    </nav>
+    <div class="container mt-5">
+      <div class="row justify-content-center">
+        <div class="col-md-8">
+          <div class="card shadow-lg border-danger">
+            <div class="card-header bg-danger text-white text-center">
+              <h3>
+                <i class="fas fa-times-circle"></i> Solicitud **Rechazada**
+              </h3>
+            </div>
+            <div class="card-body">
+              <div class="alert alert-danger" role="alert">
+                <h4 class="alert-heading">Decisión Final de la Institución</h4>
+                <p>
+                  Lamentablemente, tu solicitud N°
+                  <strong class="text-primary" id="solicitudNumero">-</strong> ha sido rechazada tras la revisión final.
+                </p>
+              </div>
+
+              <div class="mb-4">
+                <h5>Motivos de la Resolución:</h5>
+                <p class="text-muted">Aunque cumpliste con la admisibilidad inicial, la evaluación crediticia final arrojó las siguientes observaciones:</p>
+                <ul class="list-group" id="razonesLista">
+                    <li class="list-group-item list-group-item-danger">
+                        <i class="fas fa-balance-scale-left"></i> Nivel de endeudamiento supera los límites internos de la institución.
+                    </li>
+                     <li class="list-group-item list-group-item-danger">
+                        <i class="fas fa-credit-card"></i> Historial crediticio reciente presenta demasiadas consultas.
+                    </li>
+                </ul>
+              </div>
+
+              <div class="alert alert-info" role="alert">
+                <h6><i class="fas fa-info-circle"></i> ¿Qué hacer ahora?</h6>
+                <p class="mb-0">
+                  Te invitamos a **considerar otras alternativas** o a intentar una nueva solicitud en un plazo de 90 días, una vez que tu situación crediticia haya mejorado.
+                </p>
+              </div>
+
+              <div class="row mt-4">
+                <div class="col-12">
+                  <a
+                    href="/"
+                    class="btn btn-outline-primary btn-block"
+                  >
+                    <i class="fas fa-calculator"></i> Volver al Simulador
+                  </a>
+                </div>
+              </div>
+            </div>
+            <div class="card-footer text-muted text-center">
+              <small id="fechaSolicitud">
+                 Estado: <span class="badge badge-danger">RECHAZADA_FINAL</span>
+              </small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <script>
+      $(document).ready(async function () {
+        const urlParams = new URLSearchParams(window.location.search);
+        const solicitudId = urlParams.get('solicitud_id');
+        
+        if (!solicitudId) {
+          solicitudId = localStorage.getItem('solicitud_id');
+        }
+
+        if (!solicitudId) {
+          alert('ID de solicitud no encontrado.');
+          window.location.href = '/';
+          return;
+        }
+
+        try {
+          // Obtener detalles de la solicitud
+          const response = await fetch(`/api/solicitud/${solicitudId}`);
+          if (!response.ok) {
+            throw new Error('Error al obtener solicitud');
+          }
+          const solicitud = await response.json();
+
+          $('#solicitudNumero').text('#' + solicitud.id);
+
+          // Formatear fecha
+          const fecha = new Date(solicitud.fecha_solicitud);
+          const fechaFormateada = fecha.toLocaleDateString('es-CL') + ' ' + fecha.toLocaleTimeString('es-CL');
+          $('#fechaSolicitud').prepend(`Notificado el: ${fechaFormateada} | `);
+
+        } catch (error) {
+          console.error('Error:', error);
+          alert('Error al cargar los detalles del rechazo.');
+          window.location.href = '/';
+        }
+      });
+    </script>
+  </body>
+</html>

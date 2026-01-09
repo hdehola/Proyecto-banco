@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>¡Préstamo Aprobado!</title>
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+    />
+    <style>
+      body {
+        background-color: #f8f9fa;
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
+      <a class="navbar-brand" href="/">
+        <i class="fas fa-university"></i> Sistema de Préstamos
+      </a>
+    </nav>
+    <div class="container mt-5">
+      <div class="row justify-content-center">
+        <div class="col-md-8">
+          <div class="card shadow-lg border-primary">
+            <div class="card-header bg-primary text-white text-center">
+              <h3>
+                <i class="fas fa-thumbs-up"></i> ¡Felicidades, tu préstamo ha sido **Aprobado**!
+              </h3>
+            </div>
+            <div class="card-body text-center">
+              <div class="alert alert-success" role="alert">
+                <h4>Tu solicitud N° <strong id="solicitudNumero">#XX</strong> ha sido aprobada por la Institución Financiera.</h4>
+                <p>Estás a un paso de recibir tu dinero.</p>
+              </div>
+
+              <div class="mb-4">
+                <h5>Detalles del Préstamo:</h5>
+                <table class="table table-borderless" id="solicitudDetalles">
+                    <tr><td><strong>Monto Solicitado:</strong></td><td class="text-success" id="montoAprobado"></td></tr>
+                    <tr><td><strong>Plazo:</strong></td><td id="plazoAprobado"></td></tr>
+                    <tr><td><strong>Valor Cuota:</strong></td><td class="text-primary" id="cuotaAprobada"></td></tr>
+                </table>
+              </div>
+
+              <div class="alert alert-info" role="alert">
+                <h6><i class="fas fa-file-signature"></i> Próximo paso: Firma de Documentos</h6>
+                <p class="mb-0">
+                  Para formalizar tu préstamo, por favor haz clic en el botón inferior. Serás redirigido a nuestra plataforma de firma electrónica.
+                </p>
+              </div>
+
+              <div class="row mt-4">
+                <div class="col-12">
+                  <button
+                    class="btn btn-lg btn-block btn-success"
+                    id="btnFirmar"
+                  >
+                    <i class="fas fa-handshake"></i> Firmar Documentos y Desembolsar
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="card-footer text-muted text-center">
+              <small id="fechaSolicitud">
+                Estado: <span class="badge badge-primary">APROBADA_FINAL</span>
+              </small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <script>
+      $(document).ready(async function () {
+        
+        const urlParams = new URLSearchParams(window.location.search);
+        let solicitudId = urlParams.get('id'); // 1. Buscar 'id' en la URL (Formato: ?id=XXX)
+
+        if (!solicitudId) {
+          solicitudId = localStorage.getItem('solicitud_id'); // 2. Si no está en URL, usar localStorage
+        }
+        
+        if (!solicitudId) {
+          alert('ID de solicitud no encontrado.');
+          window.location.href = '/';
+          return;
+        }
+
+        try {
+          // Nota: En un sistema real, el backend aquí confirmaría el estado APROBADA_FINAL
+          const response = await fetch(`/api/solicitud/${solicitudId}`);
+          if (!response.ok) {
+            throw new Error('Error al obtener solicitud');
+          }
+          const solicitud = await response.json();
+
+          $('#solicitudNumero').text('#' + solicitud.id);
+          
+          // *** El problema estaba aquí, jQuery ahora usa los datos de la solicitud ***
+          $('#montoAprobado').text(`$${parseFloat(solicitud.monto_solicitado).toLocaleString('es-CL')}`);
+          $('#plazoAprobado').text(`${solicitud.plazo_meses} meses`);
+          $('#cuotaAprobada').text(`$${parseFloat(solicitud.valor_cuota).toLocaleString('es-CL')}`);
+          
+          // Formatear fecha (opcional)
+          const fecha = new Date(solicitud.fecha_solicitud);
+          const fechaFormateada = fecha.toLocaleDateString('es-CL') + ' ' + fecha.toLocaleTimeString('es-CL');
+          $('#fechaSolicitud').prepend(`Notificado el: ${fechaFormateada} | `);
+
+          // Simular la redirección a la plataforma de firma
+          $('#btnFirmar').on('click', function() {
+              alert('Simulando redirección a plataforma de Firma Electrónica...');
+              // Aquí iría window.location.href = 'URL_PLATAFORMA_FIRMA';
+              window.location.href = '/'; // Volver a inicio
+          });
+
+        } catch (error) {
+          console.error('Error:', error);
+          alert('Error al cargar los detalles de la aprobación.');
+          window.location.href = '/';
+        }
+      });
+    </script>
+  </body>
+</html>

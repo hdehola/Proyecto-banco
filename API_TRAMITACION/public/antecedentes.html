@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Solicitud de préstamo</title>
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+    />
+    <style>
+      body {
+        background-color: #f8f9fa;
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
+      <a class="navbar-brand" href="/">
+        <i class="fas fa-university"></i> Sistema de Préstamos
+      </a>
+    </nav>
+    <div class="container mt-4">
+      <a href="/" class="btn btn-secondary mt-3">Volver</a>
+
+      <h1 class="my-4 text-primary">Solicitud de Préstamo</h1>
+      <p class="lead mb-4 text-secondary">
+        Por favor, completa los siguientes campos y adjunta los documentos requeridos
+        para generar tu solicitud.
+      </p>
+
+      <div id="simulacionInfo" class="alert alert-info mb-4" role="alert" style="display: none;">
+        <h6><i class="fas fa-calculator"></i> Datos de tu simulación:</h6>
+        <div class="row" id="simulacionDatos">
+        </div>
+      </div>
+
+      <div id="errorAlert" class="alert alert-danger" role="alert" style="display: none;"></div>
+
+      <div class="card p-4 shadow mb-5">
+        <form id="solicitudForm" enctype="multipart/form-data">
+          <h5 class="card-title mb-4">1. Datos Personales</h5>
+          <div class="row">
+            <div class="form-group col-md-6">
+              <label for="nombre">Nombre Completo:</label>
+              <input
+                type="text"
+                class="form-control"
+                id="nombre"
+                name="nombre"
+                required
+              />
+            </div>
+            <div class="form-group col-md-6">
+              <label for="rut">RUT (Ej: 12.345.678-K):</label>
+              <input
+                type="text"
+                class="form-control"
+                id="rut"
+                name="rut"
+                required
+                placeholder="12.345.678-K"
+              />
+            </div>
+          </div>
+          <div class="row">
+            <div class="form-group col-md-6">
+              <label for="email">Correo Electrónico:</label>
+              <input
+                type="email"
+                class="form-control"
+                id="email"
+                name="email"
+                required
+              />
+            </div>
+            <div class="form-group col-md-6">
+              <label for="telefono">Teléfono de Contacto:</label>
+              <input
+                type="tel"
+                class="form-control"
+                id="telefono"
+                name="telefono"
+                required
+                placeholder="+56 9 1234 5678"
+              />
+            </div>
+          </div>
+          
+          <hr class="my-4" />
+          <h5 class="card-title mb-4">2. Datos de Identificación y Financieros</h5>
+
+          <div class="row">
+            <div class="form-group col-md-4">
+              <label for="fecha_nacimiento">Fecha de Nacimiento:</label>
+              <input
+                type="date"
+                class="form-control"
+                id="fecha_nacimiento"
+                name="fecha_nacimiento"
+                required
+              />
+            </div>
+            <div class="form-group col-md-4">
+              <label for="fecha_vencimiento_cedula">Vencimiento Cédula:</label>
+              <input
+                type="date"
+                class="form-control"
+                id="fecha_vencimiento_cedula"
+                name="fecha_vencimiento_cedula"
+                required
+              />
+            </div>
+            <div class="form-group col-md-4">
+              <label for="ingreso_mensual">Ingreso Mensual Declarado ($):</label>
+              <input
+                type="number"
+                class="form-control"
+                id="ingreso_mensual"
+                name="ingreso_mensual"
+                required
+                min="0"
+                placeholder="Ej: 500000"
+              />
+            </div>
+          </div>
+
+          <hr class="my-4" />
+          <h5 class="card-title mb-4">3. Domicilio</h5>
+          <div class="row">
+            <div class="form-group col-md-4">
+              <label for="pais">País:</label>
+              <input
+                type="text"
+                class="form-control"
+                id="pais"
+                name="pais"
+                value="Chile"
+                required
+              />
+            </div>
+            <div class="form-group col-md-4">
+              <label for="region">Región:</label>
+              <input
+                type="text"
+                class="form-control"
+                id="region"
+                name="region"
+                required
+              />
+            </div>
+            <div class="form-group col-md-4">
+              <label for="calle">Calle:</label>
+              <input
+                type="text"
+                class="form-control"
+                id="calle"
+                name="calle"
+                required
+              />
+            </div>
+          </div>
+          <div class="row">
+            <div class="form-group col-md-4">
+              <label for="numero_domicilio">Número:</label>
+              <input
+                type="text"
+                class="form-control"
+                id="numero_domicilio"
+                name="numero_domicilio"
+                required
+              />
+            </div>
+            <div class="form-group col-md-8">
+              <label for="detalle_domicilio">Detalle (Depto, casa, etc.):</label>
+              <input
+                type="text"
+                class="form-control"
+                id="detalle_domicilio"
+                name="detalle_domicilio"
+                placeholder="(Opcional)"
+              />
+            </div>
+          </div>
+
+          <hr class="my-4" />
+
+          <h5 class="card-title mb-3">4. Documentos Requeridos</h5>
+
+          <div class="alert alert-warning small" role="alert">
+            <i class="fas fa-exclamation-triangle"></i>
+            Asegúrate de que tus documentos sean legibles (PDF, JPG o PNG, máximo 5MB
+            por archivo).
+          </div>
+
+          <div class="form-group">
+            <label for="liquidacion">4.1. Última Liquidación de Sueldo:</label>
+            <div class="custom-file">
+              <input
+                type="file"
+                class="custom-file-input"
+                id="liquidacion"
+                name="liquidacion"
+                accept=".pdf,.jpg,.jpeg,.png"
+                required
+              />
+              <label class="custom-file-label" for="liquidacion" data-browse="Buscar"
+                >Seleccionar archivo...</label
+              >
+            </div>
+            <small class="form-text text-muted"
+              >Formatos permitidos: PDF, JPG, PNG (máx. 5MB)</small
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="cedula"
+              >4.2. Copia de Cédula de Identidad (frente y reverso):</label
+            >
+            <div class="custom-file">
+              <input
+                type="file"
+                class="custom-file-input"
+                id="cedula"
+                name="cedula"
+                accept=".pdf,.jpg,.jpeg,.png"
+                required
+              />
+              <label class="custom-file-label" for="cedula" data-browse="Buscar"
+                >Seleccionar archivo...</label
+              >
+            </div>
+            <small class="form-text text-muted"
+              >Formatos permitidos: PDF, JPG, PNG (máx. 5MB)</small
+            >
+          </div>
+
+          <hr class="my-4" />
+
+          <div class="d-flex justify-content-between">
+            <a href="/" class="btn btn-secondary">
+              <i class="fas fa-arrow-left"></i> Volver a Simulación
+            </a>
+            <button type="submit" class="btn btn-lg btn-primary" id="submitBtn">
+              <i class="fas fa-paper-plane"></i> Enviar Solicitud
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <script>
+      $(document).ready(function () {
+        // Cargar datos de simulación desde localStorage
+        const simulacionData = JSON.parse(localStorage.getItem('simulacion_data'));
+        if (!simulacionData) {
+          alert('No hay datos de simulación. Por favor, realiza una simulación primero.');
+          window.location.href = '/';
+          return;
+        }
+
+        // Mostrar datos de simulación
+        $('#simulacionInfo').show();
+        $('#simulacionDatos').html(`
+          <div class="col-md-3">
+            <strong>Monto:</strong> $${simulacionData.monto.toLocaleString('es-CL')}
+          </div>
+          <div class="col-md-3">
+            <strong>Plazo:</strong> ${simulacionData.plazo} meses
+          </div>
+          <div class="col-md-3">
+            <strong>Cuota:</strong> $${simulacionData.valor_cuota.toLocaleString('es-CL')}
+          </div>
+          <div class="col-md-3">
+            <strong>Tasa:</strong> ${simulacionData.tasa_interes_anual}%
+          </div>
+        `);
+
+        // Actualizar etiqueta del archivo cuando se selecciona
+        $(".custom-file-input").on("change", function () {
+          let fileName = $(this).val().split("\\").pop();
+          if (fileName.length > 30) {
+            fileName = fileName.substring(0, 27) + "...";
+          }
+          $(this).next(".custom-file-label").html(fileName);
+        });
+
+        // Validación de tamaño de archivo
+        $(".custom-file-input").on("change", function () {
+          const maxSize = 5 * 1024 * 1024; // 5MB
+          const file = this.files[0];
+
+          if (file && file.size > maxSize) {
+            alert(
+              "El archivo es demasiado grande. El tamaño máximo permitido es 5MB."
+            );
+            $(this).val("");
+            $(this).next(".custom-file-label").html("Seleccionar archivo...");
+          }
+        });
+
+        // Manejar submit del formulario
+        $('#solicitudForm').on('submit', async function(e) {
+          e.preventDefault();
+          
+          $('#submitBtn')
+            .prop("disabled", true)
+            .html('<i class="fas fa-spinner fa-spin"></i> Enviando...');
+
+          const formData = new FormData();
+          formData.append('simulacion_id', simulacionData.id);
+          formData.append('nombre', $('#nombre').val());
+          formData.append('rut', $('#rut').val());
+          formData.append('email', $('#email').val());
+          formData.append('telefono', $('#telefono').val());
+          formData.append('fecha_nacimiento', $('#fecha_nacimiento').val());
+          formData.append('fecha_vencimiento_cedula', $('#fecha_vencimiento_cedula').val());
+          formData.append('ingreso_mensual', $('#ingreso_mensual').val());
+          formData.append('pais', $('#pais').val());
+          formData.append('region', $('#region').val());
+          formData.append('calle', $('#calle').val());
+          formData.append('numero_domicilio', $('#numero_domicilio').val());
+          formData.append('detalle_domicilio', $('#detalle_domicilio').val());
+          formData.append('liquidacion', $('#liquidacion')[0].files[0]);
+          formData.append('cedula', $('#cedula')[0].files[0]);
+
+          try {
+            // Nota: Para subir archivos necesitarías usar multer en el backend
+            // Por ahora, convertimos los archivos a base64 o los enviamos como JSON
+            // Esto es una simplificación - en producción usarías FormData con multer
+            
+            const solicitudData = {
+              simulacion_id: simulacionData.id,
+              nombre: $('#nombre').val(),
+              rut: $('#rut').val(),
+              email: $('#email').val(),
+              telefono: $('#telefono').val(),
+              fecha_nacimiento: $('#fecha_nacimiento').val(),
+              fecha_vencimiento_cedula: $('#fecha_vencimiento_cedula').val(),
+              ingreso_mensual: parseFloat($('#ingreso_mensual').val()),
+              pais: $('#pais').val(),
+              region: $('#region').val(),
+              calle: $('#calle').val(),
+              numero_domicilio: $('#numero_domicilio').val(),
+              detalle_domicilio: $('#detalle_domicilio').val()
+            };
+
+            const response = await fetch('/api/solicitud', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(solicitudData)
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+              throw new Error(data.error || data.errores?.join(', ') || 'Error al crear solicitud');
+            }
+
+            // Guardar datos de solicitud
+            localStorage.setItem('solicitud_id', data.id);
+            localStorage.setItem('solicitud_estado', data.estado);
+            if (data.razones_rechazo) {
+              localStorage.setItem('rechazo_razones', JSON.stringify(data.razones_rechazo));
+            }
+
+            // Limpiar datos de simulación
+            localStorage.removeItem('simulacion_data');
+
+            // Redirigir según el estado
+            if (data.estado === 'RECHAZADO_ADMISIBILIDAD') {
+              window.location.href = '/rechazo.html';
+            } else {
+              window.location.href = '/exito.html';
+            }
+
+          } catch (error) {
+            $('#errorAlert').text('Error: ' + error.message).show();
+            $('#submitBtn')
+              .prop("disabled", false)
+              .html('<i class="fas fa-paper-plane"></i> Enviar Solicitud');
+          }
+        });
+      });
+    </script>
+  </body>
+</html>

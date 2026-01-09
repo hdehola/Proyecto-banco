@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Solicitud No Formalizada</title>
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+    />
+    <style>
+      body {
+        background-color: #f8f9fa;
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
+      <a class="navbar-brand" href="/">
+        <i class="fas fa-university"></i> Sistema de Préstamos
+      </a>
+    </nav>
+    <div class="container mt-5">
+      <div class="row justify-content-center">
+        <div class="col-md-8">
+          <div class="card shadow-lg border-danger">
+            <div class="card-header bg-danger text-white text-center">
+              <h3>
+                <i class="fas fa-exclamation-triangle"></i> Solicitud No
+                Formalizada
+              </h3>
+            </div>
+            <div class="card-body">
+              <div class="alert alert-danger" role="alert">
+                <h4 class="alert-heading">Rechazo de Admisibilidad</h4>
+                <p>
+                  Tu solicitud N°
+                  <strong class="text-primary" id="solicitudNumero">-</strong> no puede
+                  formalizarse en este momento, ya que no cumple con las siguientes
+                  reglas de admisibilidad:
+                </p>
+              </div>
+
+              <div class="mb-4">
+                <h5>Razones del Rechazo:</h5>
+                <ul class="list-group" id="razonesLista">
+                </ul>
+              </div>
+
+              <div class="alert alert-info" role="alert">
+                <h6><i class="fas fa-info-circle"></i> ¿Qué hacer ahora?</h6>
+                <p class="mb-0">
+                  Te sugerimos hablar con un ejecutivo para reconsiderar tu caso o
+                  verificar si hubo algún error en el ingreso de tus datos.
+                </p>
+              </div>
+
+              <div class="row mt-4">
+                <div class="col-12">
+                  <a
+                    href="/"
+                    class="btn btn-outline-primary btn-block"
+                  >
+                    <i class="fas fa-calculator"></i> Volver al Simulador
+                  </a>
+                </div>
+              </div>
+            </div>
+            <div class="card-footer text-muted text-center">
+              <small id="fechaSolicitud">
+              </small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <script>
+      $(document).ready(async function () {
+        const solicitudId = localStorage.getItem('solicitud_id');
+        const razonesRechazo = JSON.parse(localStorage.getItem('rechazo_razones') || '[]');
+        
+        if (!solicitudId || razonesRechazo.length === 0) {
+          alert('No se encontró información de rechazo.');
+          window.location.href = '/';
+          return;
+        }
+
+        try {
+          // Obtener detalles de la solicitud
+          const response = await fetch(`/api/solicitud/${solicitudId}`);
+          const solicitud = await response.json();
+
+          if (!response.ok) {
+            throw new Error('Error al obtener solicitud');
+          }
+
+          $('#solicitudNumero').text('#' + solicitud.id);
+
+          // Mostrar razones de rechazo
+          const lista = $('#razonesLista');
+          razonesRechazo.forEach(razon => {
+            lista.append(`
+              <li class="list-group-item list-group-item-danger">
+                <i class="fas fa-times-circle"></i> ${razon}
+              </li>
+            `);
+          });
+
+          // Formatear fecha
+          const fecha = new Date(solicitud.fecha_solicitud);
+          const fechaFormateada = fecha.toLocaleDateString('es-CL') + ' ' + fecha.toLocaleTimeString('es-CL');
+          $('#fechaSolicitud').html(`
+            Solicitud registrada el: ${fechaFormateada} | Estado:
+            <span class="badge badge-danger">${solicitud.estado}</span>
+          `);
+
+          // Limpiar localStorage
+          localStorage.removeItem('solicitud_id');
+          localStorage.removeItem('rechazo_razones');
+
+        } catch (error) {
+          console.error('Error:', error);
+          alert('Error al cargar los detalles del rechazo.');
+        }
+      });
+    </script>
+  </body>
+</html>
+
